@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const bot = new Discord.Client();
 const YTDL = require("ytdl-core");
 const YT = require('simple-youtube-api');
+const db = require('./dbconnection').db
 
 //////////////////////////////credentials///////////////////////////////////////////////////
 
@@ -27,11 +28,16 @@ function play(connection,message){
 function searchvideo(message,name,choice){
     var title = {};
     var surl = {};
+    
     if(choice==null)
         {
             youtube.search(name,4).then(results => {
             for(var i=0;i<4;i++)
-            {
+            {   
+                var insertQuery = "INSERT INTO songselection(no, title, url) VALUES ('"+(i+1)+"','"+results[i].title+"', '"+results[i].url+"');"
+                db.any(insertQuery);
+
+
                 title[i]=results[i].title;
                 console.log('searchtitle:' + title[i]);
                 surl[i]=results[i].url;
@@ -172,25 +178,7 @@ bot.on('message',message => {
                                             if(message.guild.voiceConnection) server.dispatcher.resume();
                         break;
 
-                        case 's' :
-                        case 'search' :
-                                           if(!args[1]){
-                                                msgc.sendMessage("please provide a video name");
-                                                return;
-                                            }
-
-                                            if(!message.member.voiceChannel){
-                                                msgc.sendMessage('you must be in a voice channel');
-                                                return;
-                                            }
-
-                                             if(!servers[message.guild.id]) {
-                                                servers[message.guild.id] = { queue: [] };
-                                            }
-
-                                            youtube.search("waka waka", 4).then(results => {for(var i=0;i<4;i++){message.channel.sendMessage(results[i].title + ' ' + results[i].id+ ' ' + results[i].url)}});
-
-                        break;
+        
 
 
 
